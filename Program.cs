@@ -8,13 +8,13 @@
         public static int delay = 1000;
         public static double incrementAmount = 0.00D;
         public static string[,] upgrades = {
-            {"Increment Time", "Decreases time to receive money", "10"},
-            {"Increment Amount", "Increases money received", "20"}
+            {"Increment Time ", "Decreases time to receive money, costs: ", "10"},
+            {"Increment Amount ", "Increases money received, costs: ", "20"}
             };
 
         public static void Main(string[] args)
         {
-            const int loopCount = 5;
+            const int loopCount = 10;
             int currentLoop = 0;
 
             ConsoleKeyInfo keyinfo;
@@ -94,7 +94,94 @@
 
         public static void AskUpgrade()
         {
-            
+            string moneyString = money.ToString("C");
+            bool answer = AskYesNo(
+            $"You have: {moneyString}\n Would you like to Upgrade something?\n(y/N)\n",
+            ConsoleColor.Green);
+
+            if (answer)
+                DoUpgrade();
+
+        }
+
+        public static void DoUpgrade()
+        {
+            /*
+            public static string[,] upgrades = {
+            {"Increment Time", "Decreases time to receive money", "10"},
+            {"Increment Amount", "Increases money received", "20"}
+            };
+            */
+
+            Console.WriteLine($"Chose from 1-{upgrades.Length / 3}");
+            int currentIndex = 0;
+
+            for (int i = 0; i < upgrades.Length; i++)
+            {
+
+                if (i == 3)
+                {
+                    currentIndex += 1;
+                    Console.WriteLine();
+                    if (currentIndex >= upgrades.Length / 3)
+                        break;
+
+                    i = 0;
+                }
+                else if (i == 2)
+                {
+                    float cost = float.Parse(upgrades[currentIndex, i]) * level;
+                    Print($"{cost}", ConsoleColor.Blue, false);
+                }
+                else
+                    Print($"{upgrades[currentIndex, i]}", ConsoleColor.Blue, false);
+            }
+
+#pragma warning disable CS8604 // Possible null reference argument.
+            int index = int.Parse(Console.ReadLine());
+#pragma warning restore CS8604 // Possible null reference argument.
+
+        string chosenUpgrade = upgrades[index, 0];
+        float chosenUpgradeCose = float.Parse(upgrades[index, 2]);
+
+        }
+
+        /// <summary>
+        /// Input a message such as: "Continue?\n (Y/n)
+        /// and ensure that the last argument is "y" and not "n" as "y" is the default in this case. 
+        /// </summary>
+        /// <param name="msg">The "question" to ask</param>
+        /// <param name="color">Color of the text to print, can be empty</param>
+        /// <param name="def">y or n, make sure to capitalise it appropriately in your msg</param>
+        /// <returns></returns>
+        public static bool AskYesNo(string msg, ConsoleColor? color)
+        {
+            color ??= ConsoleColor.White;
+            Print(msg, color, true);
+            string? answer = Console.ReadLine();
+            return answer?.Trim().ToLower() == "y";
+        }
+
+        /// <summary>
+        /// Faster way to print to console/display text.
+        /// </summary>
+        /// <param name="msg">Message to be printed</param>
+        /// <param name="color">Color of message, can be empty</param>
+        /// <param name="clear">Whether or not to clear console, defaults to false</param>
+        public static void Print(string msg, ConsoleColor? color, bool? clear)
+        {
+
+            clear ??= false;
+
+            if ((bool)clear)
+                Console.Clear();
+
+            color ??= ConsoleColor.White;
+
+            Console.ForegroundColor = (ConsoleColor)color;
+            Console.Write(msg);
+            Console.ResetColor();
+
         }
 
     }
