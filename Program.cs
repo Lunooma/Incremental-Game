@@ -2,7 +2,7 @@
 {
     class Incremental
     {
-        public static int level = 1;
+        public static int level = 0;
         public static double experience = GetExperienceRequiredForLevel(level);
         public static double money = 0.00D;
         public static int delay = 1000;
@@ -14,31 +14,42 @@
 
         public static void Main(string[] args)
         {
-            const int loopCount = 10;
+            const int loopCount = 50;
             int currentLoop = 0;
 
-            ConsoleKeyInfo keyinfo;
-            do
+            while (true)
             {
                 currentLoop++;
-                double increaseBy = Math.Log10(level + incrementAmount + 1);
+                double increaseBy = Math.Log10(level + 1 + incrementAmount + 1);
+                experience += 1.0D + level / 10.0D;
+
+                if (experience >= GetExperienceRequiredForLevel(level + 1))
+                {
+                    experience = 0;
+                    level++;
+                    Print($"You have leveled up to level {level}! Congrats, press ANYTHING to continue!", ConsoleColor.Yellow, true);
+                    Console.ReadLine();
+                }
+
                 money += increaseBy;
                 string moneyString = money.ToString("C");
                 string increasedByString = increaseBy.ToString("C");
 
-                Console.Clear();
-                Console.WriteLine($"Money increased by {increasedByString}\n Money:{moneyString}");
-                keyinfo = Console.ReadKey();
+                Print($"Money increased by {increasedByString}\n Money:{moneyString}", ConsoleColor.Cyan, true);
+                Console.WriteLine(string.Format("\nExperience: {0:#.##}", experience));
+                string? input = Console.ReadLine();
+
+                if (input == "")
+                {
+                    
+                }
 
                 if (currentLoop >= loopCount)
                 {
                     AskUpgrade();
                     currentLoop = 0;
                 }
-
             }
-            while (keyinfo.Key != ConsoleKey.X);
-
         }
 
         // Uses minecraft's level and experience equations :3
@@ -141,8 +152,8 @@
             int index = int.Parse(Console.ReadLine());
 #pragma warning restore CS8604 // Possible null reference argument.
 
-        string chosenUpgrade = upgrades[index, 0];
-        float chosenUpgradeCose = float.Parse(upgrades[index, 2]);
+            string chosenUpgrade = upgrades[index, 0];
+            float chosenUpgradeCose = float.Parse(upgrades[index, 2]);
 
         }
 
