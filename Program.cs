@@ -1,15 +1,17 @@
-﻿namespace Incremental
+﻿using System.Security.Cryptography.X509Certificates;
+
+namespace Incremental
 {
     class Incremental
     {
         public static int level = 0;
         public static double experience = GetExperienceRequiredForLevel(level);
         public static double money = 0.00D;
-        public static int delay = 1000;
         public static double incrementAmount = 0.00D;
+        public static double experienceBase = 1.00D;
         public static string[,] upgrades = {
-            {"Increment Time ", "Decreases time to receive money, costs: ", "10"},
-            {"Increment Amount ", "Increases money received, costs: ", "20"}
+            {"Increment Amount ", "Increases money received, costs: ", "20"},
+            {"Experience Base ", "Increases the base experience gain, costs: ", "50"}
             };
 
         public static void Main(string[] args)
@@ -21,7 +23,7 @@
             {
                 currentLoop++;
                 double increaseBy = Math.Log10(level + 1 + incrementAmount + 1);
-                experience += 1.0D + level / 10.0D;
+                experience += experienceBase + level / 10.0D;
 
                 if (experience >= GetExperienceRequiredForLevel(level + 1))
                 {
@@ -39,9 +41,19 @@
                 Console.WriteLine(string.Format("\nExperience: {0:#.##}", experience));
                 string? input = Console.ReadLine();
 
-                if (input == "")
+                if (input != "" && input != null)
                 {
-                    
+                    if (input.StartsWith("upgrade"))
+                    {
+                        if (input.EndsWith(""))
+                        {
+                            DoUpgrade();
+                        }
+                        else
+                        {
+
+                        }
+                    }
                 }
 
                 if (currentLoop >= loopCount)
@@ -115,21 +127,13 @@
 
         }
 
-        public static void DoUpgrade()
+        public static void DoUpgrade(int? index = -1)
         {
-            /*
-            public static string[,] upgrades = {
-            {"Increment Time", "Decreases time to receive money", "10"},
-            {"Increment Amount", "Increases money received", "20"}
-            };
-            */
-
             Console.WriteLine($"Chose from 1-{upgrades.Length / 3}");
             int currentIndex = 0;
 
             for (int i = 0; i < upgrades.Length; i++)
             {
-
                 if (i == 3)
                 {
                     currentIndex += 1;
@@ -141,19 +145,55 @@
                 }
                 else if (i == 2)
                 {
-                    float cost = float.Parse(upgrades[currentIndex, i]) * level;
-                    Print($"{cost}", ConsoleColor.Blue, false);
+                    float cost = float.Parse(upgrades[currentIndex, i]) * (level + 1);
+                    Print($"{cost}", ConsoleColor.Blue);
                 }
                 else
-                    Print($"{upgrades[currentIndex, i]}", ConsoleColor.Blue, false);
+                    Print($"{upgrades[currentIndex, i]}", ConsoleColor.Blue);
             }
 
-#pragma warning disable CS8604 // Possible null reference argument.
-            int index = int.Parse(Console.ReadLine());
-#pragma warning restore CS8604 // Possible null reference argument.
+            index ??= -1;
+            if (index == -1)
+            {
+                string? answer = Console.ReadLine();
+                answer ??= "1";
+                index = int.Parse(answer) - 1;
+            }
 
-            string chosenUpgrade = upgrades[index, 0];
-            float chosenUpgradeCose = float.Parse(upgrades[index, 2]);
+            string chosenUpgrade;
+            float chosenUpgradeCost;
+
+            try
+            {
+                chosenUpgrade = upgrades[(int)index, 0];
+                chosenUpgradeCost = float.Parse(upgrades[(int)index, 2]);
+            }
+            catch (System.Exception)
+            {
+                throw;
+            }
+
+            if (money >= chosenUpgradeCost)
+            {
+                switch (chosenUpgrade)
+                {
+                    case "Increment Amount ":
+                        incrementAmount++;
+                        Print($"{chosenUpgrade} is now {incrementAmount}");
+                        break;
+                    case "Experience Base ":
+                        experienceBase++;
+                        Print($"{chosenUpgrade} is now {experienceBase}");
+                        break;
+                    default:
+                        ERROR($"chosenUpgrade: {chosenUpgrade} NOT FOUND");
+                        break;
+                }
+            }
+            else
+                Print("Not enough money", ConsoleColor.Red);
+
+            Console.ReadLine();
 
         }
 
@@ -179,7 +219,7 @@
         /// <param name="msg">Message to be printed</param>
         /// <param name="color">Color of message, can be empty</param>
         /// <param name="clear">Whether or not to clear console, defaults to false</param>
-        public static void Print(string msg, ConsoleColor? color, bool? clear)
+        public static void Print(string msg, ConsoleColor? color = ConsoleColor.White, bool? clear = false)
         {
 
             clear ??= false;
@@ -193,6 +233,12 @@
             Console.Write(msg);
             Console.ResetColor();
 
+        }
+
+        public static void ERROR(string msg)
+        {
+            Print(msg, ConsoleColor.Red);
+            Environment.Exit(1);
         }
 
     }
