@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
+﻿using System.IO.Compression;
 
 namespace Incremental
 {
@@ -18,6 +18,16 @@ namespace Incremental
         {
             const int loopCount = 50;
             int currentLoop = 0;
+
+            if (File.Exists("save.txt"))
+            {
+                SetVariables("save.txt");
+            }
+            else
+            {
+                File.Create("save.txt");
+                UpdateFile();
+            }
 
             while (true)
             {
@@ -51,7 +61,7 @@ namespace Incremental
                         }
                         else
                         {
-
+                            
                         }
                     }
                 }
@@ -239,6 +249,32 @@ namespace Incremental
         {
             Print(msg, ConsoleColor.Red);
             Environment.Exit(1);
+        }
+
+        public static void SetVariables(string? filePath = "./save.txt/")
+        {
+            filePath ??= "./save.txt/";
+            string fileString = File.ReadAllText(filePath);
+
+            Print($"File text: {fileString}");
+            Console.ReadLine();
+            /*string[] saveInfo = fileString[0].Split(';'); ;
+
+            // 0;0;0.00;0.00;1.00 Default Info
+
+            level = int.Parse(saveInfo[0]);
+            money = double.Parse(saveInfo[1]);
+            experience = GetExperienceRequiredForLevel(level);
+            incrementAmount = double.Parse(saveInfo[2]);
+            experienceBase = double.Parse(saveInfo[3]);
+            */
+        }
+
+        public static void UpdateFile(string? filePath = "save.txt")
+        {
+            filePath ??= "save.txt";
+            string save = $"{level};{money};{incrementAmount};{experienceBase}";
+            File.WriteAllText(filePath, save);
         }
 
     }
