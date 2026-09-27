@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Globalization;
+using System.IO.Compression;
 
 namespace Incremental
 {
@@ -9,6 +10,7 @@ namespace Incremental
         public static double money = 0.00D;
         public static double incrementAmount = 0.00D;
         public static double experienceBase = 1.00D;
+        public static string saveFile = "../../../save.txt";
         public static string[,] upgrades = {
             {"Increment Amount ", "Increases money received, costs: ", "20"},
             {"Experience Base ", "Increases the base experience gain, costs: ", "50"}
@@ -19,13 +21,13 @@ namespace Incremental
             const int loopCount = 50;
             int currentLoop = 0;
 
-            if (File.Exists("save.txt"))
+            if (File.Exists(saveFile))
             {
-                SetVariables("save.txt");
+                SetVariables();
             }
             else
             {
-                File.Create("save.txt");
+                File.Create(saveFile);
                 UpdateFile();
             }
 
@@ -55,16 +57,18 @@ namespace Incremental
                 {
                     if (input.StartsWith("upgrade"))
                     {
-                        if (input.EndsWith(""))
+                        if (input.EndsWith("upgrade"))
                         {
                             DoUpgrade();
                         }
                         else
                         {
-                            
+                            DoUpgrade(int.Parse(input[7..]));
                         }
                     }
                 }
+
+                UpdateFile();
 
                 if (currentLoop >= loopCount)
                 {
@@ -139,36 +143,41 @@ namespace Incremental
 
         public static void DoUpgrade(int? index = -1)
         {
-            Console.WriteLine($"Chose from 1-{upgrades.Length / 3}");
-            int currentIndex = 0;
-
-            for (int i = 0; i < upgrades.Length; i++)
-            {
-                if (i == 3)
-                {
-                    currentIndex += 1;
-                    Console.WriteLine();
-                    if (currentIndex >= upgrades.Length / 3)
-                        break;
-
-                    i = 0;
-                }
-                else if (i == 2)
-                {
-                    float cost = float.Parse(upgrades[currentIndex, i]) * (level + 1);
-                    Print($"{cost}", ConsoleColor.Blue);
-                }
-                else
-                    Print($"{upgrades[currentIndex, i]}", ConsoleColor.Blue);
-            }
-
             index ??= -1;
             if (index == -1)
             {
+                Console.WriteLine($"Chose from 1-{upgrades.Length / 3}");
+                int currentIndex = 0;
+
+                for (int i = 0; i < upgrades.Length; i++)
+                {
+                    if (i == 3)
+                    {
+                        currentIndex += 1;
+                        Console.WriteLine();
+                        if (currentIndex >= upgrades.Length / 3)
+                            break;
+
+                        i = 0;
+                    }
+                    else if (i == 2)
+                    {
+                        float cost = float.Parse(upgrades[currentIndex, i]) * (level + 1);
+                        Print($"{cost}", ConsoleColor.Blue);
+                    }
+                    else
+                        Print($"{upgrades[currentIndex, i]}", ConsoleColor.Blue);
+                }
+
                 string? answer = Console.ReadLine();
                 answer ??= "1";
+                if (answer == "")
+                    answer = "1";
                 index = int.Parse(answer) - 1;
             }
+            else if (index != -1)
+                index--;
+
 
             string chosenUpgrade;
             float chosenUpgradeCost;
@@ -251,28 +260,24 @@ namespace Incremental
             Environment.Exit(1);
         }
 
-        public static void SetVariables(string? filePath = "./save.txt/")
+        public static void SetVariables(string? filePath = "../../../save.txt")
         {
-            filePath ??= "./save.txt/";
+            filePath ??= saveFile;
             string fileString = File.ReadAllText(filePath);
 
-            Print($"File text: {fileString}");
-            Console.ReadLine();
-            /*string[] saveInfo = fileString[0].Split(';'); ;
-
-            // 0;0;0.00;0.00;1.00 Default Info
+            string[] saveInfo = fileString.Split(';');
 
             level = int.Parse(saveInfo[0]);
             money = double.Parse(saveInfo[1]);
             experience = GetExperienceRequiredForLevel(level);
             incrementAmount = double.Parse(saveInfo[2]);
             experienceBase = double.Parse(saveInfo[3]);
-            */
+
         }
 
-        public static void UpdateFile(string? filePath = "save.txt")
+        public static void UpdateFile(string? filePath = "../../../save.txt")
         {
-            filePath ??= "save.txt";
+            filePath ??= saveFile;
             string save = $"{level};{money};{incrementAmount};{experienceBase}";
             File.WriteAllText(filePath, save);
         }
