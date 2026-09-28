@@ -6,7 +6,7 @@ namespace Incremental
     class Incremental
     {
         public static int level = 0;
-        public static double experience = GetExperienceRequiredForLevel(level);
+        public static double experience = 0;
         public static double money = 0.00D;
         public static double incrementAmount = 0.00D;
         public static double experienceBase = 1.00D;
@@ -35,7 +35,7 @@ namespace Incremental
             {
                 currentLoop++;
                 double increaseBy = Math.Log10(level + 1 + incrementAmount + 1);
-                experience += experienceBase + level / 10.0D;
+                experience += experienceBase + Math.Round(level / 10.0D) * 1 + increaseBy / 10;
 
                 if (experience >= GetExperienceRequiredForLevel(level + 1))
                 {
@@ -50,7 +50,7 @@ namespace Incremental
                 string increasedByString = increaseBy.ToString("C");
 
                 Print($"Money increased by {increasedByString}\n Money:{moneyString}", ConsoleColor.Cyan, true);
-                Console.WriteLine(string.Format("\nExperience: {0:#.##}", experience));
+                Console.WriteLine(string.Format("\nExperience: {0:#,##}", experience));
                 string? input = Console.ReadLine();
 
                 if (input != "" && input != null)
@@ -63,7 +63,7 @@ namespace Incremental
                         }
                         else
                         {
-                            DoUpgrade(int.Parse(input[7..]));
+                            DoUpgrade(int.Parse(input[8..]));
                         }
                     }
                 }
@@ -162,8 +162,13 @@ namespace Incremental
                     }
                     else if (i == 2)
                     {
-                        float cost = float.Parse(upgrades[currentIndex, i]) * (level + 1);
-                        Print($"{cost}", ConsoleColor.Blue);
+                        double cost = double.Parse(upgrades[currentIndex, i]) + ((experienceBase + incrementAmount) * 10);
+                        ConsoleColor color;
+                        if (money >= cost)
+                            color = ConsoleColor.Green;
+                        else 
+                            color = ConsoleColor.Red;
+                        Print($"{cost}", color);
                     }
                     else
                         Print($"{upgrades[currentIndex, i]}", ConsoleColor.Blue);
@@ -180,12 +185,12 @@ namespace Incremental
 
 
             string chosenUpgrade;
-            float chosenUpgradeCost;
+            double chosenUpgradeCost;
 
             try
             {
                 chosenUpgrade = upgrades[(int)index, 0];
-                chosenUpgradeCost = float.Parse(upgrades[(int)index, 2]);
+                chosenUpgradeCost = double.Parse(upgrades[(int)index, 2]);
             }
             catch (System.Exception)
             {
@@ -208,10 +213,15 @@ namespace Incremental
                         ERROR($"chosenUpgrade: {chosenUpgrade} NOT FOUND");
                         break;
                 }
+
+                money -= chosenUpgradeCost;
+
+                Thread.Sleep(5);
+
             }
             else
                 Print("Not enough money", ConsoleColor.Red);
-
+            
             Console.ReadLine();
 
         }
@@ -269,16 +279,16 @@ namespace Incremental
 
             level = int.Parse(saveInfo[0]);
             money = double.Parse(saveInfo[1]);
-            experience = GetExperienceRequiredForLevel(level);
-            incrementAmount = double.Parse(saveInfo[2]);
-            experienceBase = double.Parse(saveInfo[3]);
+            experience = double.Parse(saveInfo[2]);
+            incrementAmount = double.Parse(saveInfo[3]);
+            experienceBase = double.Parse(saveInfo[4]);
 
         }
 
         public static void UpdateFile(string? filePath = "../../../save.txt")
         {
             filePath ??= saveFile;
-            string save = $"{level};{money};{incrementAmount};{experienceBase}";
+            string save = $"{level};{money};{experience};{incrementAmount};{experienceBase}";
             File.WriteAllText(filePath, save);
         }
 
