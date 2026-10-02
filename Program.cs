@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.IO.Compression;
 
 namespace Incremental
@@ -228,11 +228,10 @@ namespace Incremental
 
         /// <summary>
         /// Input a message such as: "Continue?\n (Y/n)
-        /// and ensure that the last argument is "y" and not "n" as "y" is the default in this case. 
+        /// returns true/false.
         /// </summary>
         /// <param name="msg">The "question" to ask</param>
         /// <param name="color">Color of the text to print, can be empty</param>
-        /// <param name="def">y or n, make sure to capitalise it appropriately in your msg</param>
         /// <returns></returns>
         public static bool AskYesNo(string msg, ConsoleColor? color)
         {
